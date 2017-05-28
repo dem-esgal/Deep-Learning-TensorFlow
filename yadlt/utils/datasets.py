@@ -93,3 +93,32 @@ def load_cifar10_dataset(cifar_dir, mode='supervised'):
     elif mode == 'unsupervised':
         return trX, teX
 
+
+def read_file(dir, to_array):
+    with open(dir, "r", encoding='utf-8', ) as f:
+        for line in f.readlines():
+            content = line.strip().split(' ')
+            to_array.extend(content)
+
+
+def load_ptb_dataset(dir='../lstm'):
+    """Load the PTB dataset
+
+    :param dir: 'ptb' or 'unsupervised' mode
+    :param one_hot: whether to get one hot encoded labels
+    :return: train, validation, test data:
+            for (X, y) if 'supervised',
+            for (X) if 'unsupervised'
+    """
+    test_dir = dir + '/data/ptb.test.txt'
+    train_dir = dir + '/data/ptb.train.txt'
+    valid_dir = dir + '/data/ptb.valid.txt'
+
+    trX = []
+    vlX = []
+    teX = []
+    read_file(train_dir, trX)
+    read_file(valid_dir, vlX)
+    read_file(test_dir, teX)
+
+    return trX, vlX, teX
