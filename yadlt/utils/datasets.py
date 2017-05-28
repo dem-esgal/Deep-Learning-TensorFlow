@@ -24,7 +24,7 @@ def load_mnist_dataset(mode='supervised', one_hot=True):
             for (X, y) if 'supervised',
             for (X) if 'unsupervised'
     """
-    mnist = input_data.read_data_sets("MNIST_data/", one_hot=one_hot)
+    mnist = input_data.read_data_sets("../MNIST_data/", one_hot=one_hot)
 
     # Training set
     trX = mnist.train.images
