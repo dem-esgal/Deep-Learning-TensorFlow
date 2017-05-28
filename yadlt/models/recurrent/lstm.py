@@ -5,6 +5,7 @@ from __future__ import print_function
 
 import numpy as np
 import tensorflow as tf
+from tensorflow.contrib import rnn
 
 from yadlt.core import Model
 from yadlt.utils import utilities
@@ -121,11 +122,11 @@ class LSTM(Model):
 
     def _create_rnn_cells(self):
         """Create the LSTM cells."""
-        lstm_cell = tf.nn.rnn_cell.LSTMCell(
+        lstm_cell = rnn.LSTMCell(
             self.num_hidden, forget_bias=0.0)
-        lstm_cell = tf.nn.rnn_cell.DropoutWrapper(
+        lstm_cell = rnn.DropoutWrapper(
             lstm_cell, output_keep_prob=self.dropout)
-        self.cell = tf.nn.rnn_cell.MultiRNNCell(
+        self.cell = rnn.MultiRNNCell(
             [lstm_cell] * self.num_layers)
 
     def _create_initstate_and_embeddings(self):
@@ -140,15 +141,15 @@ class LSTM(Model):
         """Create the training architecture and the last layer of the LSTM."""
         self.inputs = [tf.squeeze(i, [1]) for i in tf.split(
             axis=1, num_or_size_splits=self.num_steps, value=self.inputs)]
-        outputs, state = tf.nn.rnn(
-            self.cell, self.inputs, initial_state=self._init_state)
+        outputs, state = tf.contrib.rnn.static_rnn(
+            self.cell, self.inputs, initial_state = self._init_state)
 
         output = tf.reshape(tf.concat(axis=1, values=outputs), [-1, self.num_hidden])
         softmax_w = tf.get_variable(
             "softmax_w", [self.num_hidden, self.vocab_size])
         softmax_b = tf.get_variable("softmax_b", [self.vocab_size])
         logits = tf.add(tf.matmul(output, softmax_w), softmax_b)
-        loss = tf.nn.seq2seq.sequence_loss_by_example(
+        loss = tf.contrib.legacy_seq2seq.sequence_loss_by_example(
             [logits],
             [tf.reshape(self.input_labels, [-1])],
             [tf.ones([self.batch_size * self.num_steps])])
